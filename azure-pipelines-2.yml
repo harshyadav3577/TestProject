@@ -1,0 +1,46 @@
+trigger:
+  branches:
+    include:
+      - main
+
+stages:
+- stage: Build
+  displayName: Build Stage
+  jobs:
+  - job: BuildJob
+    displayName: Build Job
+    steps:
+    - script: |
+        # Add script to build PEGA application here
+        ./path/to/build_script.sh
+        echo "Building PEGA application"
+
+- stage: Test
+  displayName: Run Tests
+  jobs:
+  - job: TestJob
+    displayName: Test Job
+    steps:
+    - script: |
+        # Add script to run tests here
+        echo "Running tests"
+    - script: echo "Tests completed"
+- stage: InvokePegaAPI
+  displayName: Invoke Pega REST API
+  jobs:
+  - job: InvokePegaAPIJob
+    displayName: Invoke Pega API
+    steps:
+          - task: AzurePowerShell@5
+            displayName: 'Invoke Pega API'
+            inputs:
+              azureSubscription: 'Your Azure subscription'
+              ScriptType: 'InlineScript'
+              Inline: |
+                $uri = https://jsonplaceholder.typicode.com/posts/1  # Example API URL from GitHub
+                $headers = @{
+                  "Content-Type" = "application/json"
+                }
+                $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+                Write-Output $response
+
