@@ -1,19 +1,24 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- master
+  branches:
+    include:
+      - main  # Replace with the branch you want to trigger the pipeline
 
-pool:
-  vmImage: ubuntu-latest
-
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+stages:
+  - stage: InvokePegaAPI
+    displayName: Invoke Pega REST API
+    jobs:
+      - job: InvokePegaAPIJob
+        displayName: Invoke Pega API
+        steps:
+          - task: AzurePowerShell@5
+            displayName: 'Invoke Pega API'
+            inputs:
+              azureSubscription: 'Your Azure subscription'
+              ScriptType: 'InlineScript'
+              Inline: |
+                $uri = https://jsonplaceholder.typicode.com/posts/1  # Example API URL from GitHub
+                $headers = @{
+                  "Content-Type" = "application/json"
+                }
+                $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+                Write-Output $response
